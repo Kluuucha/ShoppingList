@@ -1,4 +1,4 @@
-const itemList = [];
+var itemList = [];
 
 const elementList = document.getElementById('shopping-list');
 const newItemButton = document.getElementById('button-add-element');
@@ -35,9 +35,9 @@ function changeItemStatus(e){
     if(e.target != e.currentTarget){
         item = itemList.find(t => findItem(t, e.target.getAttribute('data-item')));
         item.checked = !item.checked;
-        e.target.checked = item.checked
         console.log(`Current status of "${item.name}": ${item.checked}`);
     }
+    saveList();
 }
 
 function findItem(item, searchID){
@@ -72,6 +72,20 @@ function submitItem () {
     addItemToList();
     rebuildList();
     console.log(`Current item count: ${itemList.length}`);
+    saveList();
+}
+
+function saveList(){
+    localStorage.setItem('itemList', JSON.stringify(itemList));
+}
+
+function loadList(){
+    itemList = JSON.parse(localStorage.getItem('itemList'));
+}
+
+window.onload = function(){
+    loadList();
+    rebuildList();
 }
 
 newItemButton.addEventListener('click', submitItem);
