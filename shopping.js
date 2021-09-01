@@ -1,29 +1,63 @@
-const list = document.getElementById('shopping-list')
-const submit_item_button = document.getElementById('button-add-element')
-const item_field = document.getElementById('field-add-element')
+const itemList = [];
 
-function submit_item () {
-    var item = document.createElement('DIV')
-    item.classList.add('form-check')
-    item.classList.add('shopping-element')
+const elementList = document.getElementById('shopping-list');
+const newItemButton = document.getElementById('button-add-element');
+const newItemField = document.getElementById('field-add-element');
 
-    var checkbox = document.createElement('INPUT')
-    checkbox.classList.add('form-check-input')
-    checkbox.id = 'flexCheckIndeterminate'
-    checkbox.setAttribute('type', 'checkbox')
+function createItemElement (item) {
+    let element = document.createElement('div');
+    element.classList.add('form-check');
+    element.classList.add('shopping-element');
+    element.id = 'item-' + item.id;
 
-    var label = document.createElement('LABEL')
-    label.classList.add('form-check-label')
-    label.setAttribute('for', 'flexCheckIndeterminate')
+    let checkbox = document.createElement('input');
+    checkbox.classList.add('form-check-input');
+    checkbox.id = 'checkbox-' + element.id;
+    checkbox.setAttribute('type', 'checkbox');
 
-    var text = document.createTextNode(item_field.value)
+    let label = document.createElement('label');
+    label.classList.add('form-check-label');
+    label.setAttribute('for', checkbox.id);
 
-    item_field.value = ''
+    let text = document.createTextNode(item.name);
 
-    label.appendChild(text)
-    item.appendChild(checkbox)
-    item.appendChild(label)
-    document.getElementById('shopping-list').appendChild(item)
+    label.appendChild(text);
+    element.appendChild(checkbox);
+    element.appendChild(label);
+    return element;
 }
 
-submit_item_button.addEventListener('click', submit_item)
+function clearChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
+
+function rebuildList(){
+    clearChildNodes(elementList);
+//TODO: Figure out if the loop can be done by itemList.forEach
+    for (i = 0; i < itemList.length; i++) {
+        elementList.appendChild(createItemElement(itemList[i]));
+      } 
+}
+
+function getName(){
+    let name = newItemField.value;
+    newItemField.value = '';
+    return name;
+}
+function addItemToList(){
+    let submitedItem = {
+        'id': itemList.length,
+        'name': getName()
+    }
+    itemList.push(submitedItem);
+}
+
+function submitItem () {
+    addItemToList();
+    rebuildList();
+    console.log('Current item count: '+itemList.length);
+}
+
+newItemButton.addEventListener('click', submitItem);
