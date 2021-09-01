@@ -84,7 +84,7 @@ function loadList(){
 }
 
 window.onload = function(){
-    if(localStorage.getItem('itemList') === null){
+    if(localStorage.getItem('itemList') !== null){
         loadList();
         rebuildList();
     }
