@@ -83,7 +83,7 @@ function loadList(){
     itemList = JSON.parse(localStorage.getItem('itemList'));
 }
 
-window.onload = function(){
+document.onload = function(){
     if('itemList' in localStorage){
         loadList();
         rebuildList();
