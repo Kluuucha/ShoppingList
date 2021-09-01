@@ -14,9 +14,12 @@ function createItemElement (item) {
     checkbox.classList.add('form-check-input');
     checkbox.id = `checkbox-${element.id}`;
     checkbox.setAttribute('type', 'checkbox');
+    checkbox.setAttribute('data-item', item.id);
+    checkbox.checked = item.checked;
 
     let label = document.createElement('label');
     label.classList.add('form-check-label');
+    label.id = `label-${element.id}`;
     label.setAttribute('for', checkbox.id);
 
     let text = document.createTextNode(item.name);
@@ -25,6 +28,20 @@ function createItemElement (item) {
     element.appendChild(checkbox);
     element.appendChild(label);
     return element;
+}
+
+function changeItemStatus(e){
+    e.preventDefault();
+    if(e.target != e.currentTarget){
+        item = itemList.find(t => findItem(t, e.target.getAttribute('data-item')));
+        item.checked = !item.checked;
+        e.target.checked = item.checked
+        console.log(`Current status of "${item.name}": ${item.checked}`);
+    }
+}
+
+function findItem(item, searchID){
+    return item.id == searchID;
 }
 
 function clearChildNodes(parent) {
@@ -44,8 +61,9 @@ function getName(){
 
 function addItemToList(){
     let submitedItem = {
-        'id': itemList.length,
-        'name': getName()
+        'id': (itemList.length === 0 ? 0 : itemList[itemList.length - 1].id + 1),
+        'name': getName(),
+        'checked': false
     }
     itemList.push(submitedItem);
 }
@@ -57,3 +75,4 @@ function submitItem () {
 }
 
 newItemButton.addEventListener('click', submitItem);
+elementList.addEventListener('change', (e) => changeItemStatus(e));
