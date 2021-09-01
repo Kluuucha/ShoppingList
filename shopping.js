@@ -84,10 +84,11 @@ function loadList(){
 }
 
 window.onload = function(){
-    if(localStorage.getItem('itemList') !== null){
+    if('itemList' in localStorage){
         loadList();
         rebuildList();
     }
+    else itemList = [];
 }
 
 newItemButton.addEventListener('click', submitItem);
