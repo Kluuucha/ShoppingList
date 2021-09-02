@@ -1,8 +1,10 @@
 var itemList = [];
+var currentID = 0;
 
 const elementList = document.getElementById('shopping-list');
 const newItemButton = document.getElementById('button-add-element');
 const newItemField = document.getElementById('field-add-element');
+const resetButton = document.getElementById('button-reset');
 
 function createItemElement (item) {
     let element = document.createElement('div');
@@ -61,7 +63,7 @@ function getName(){
 
 function addItemToList(){
     let submitedItem = {
-        'id': (itemList.length === 0 ? 0 : itemList[itemList.length - 1].id + 1),
+        'id': currentID++,
         'name': getName(),
         'checked': false
     }
@@ -70,26 +72,39 @@ function addItemToList(){
 
 function submitItem () {
     addItemToList();
+    saveList();
     rebuildList();
     console.log(`Current item count: ${itemList.length}`);
-    saveList();
 }
 
 function saveList(){
     localStorage.setItem('itemList', JSON.stringify(itemList));
+    localStorage.setItem('currentID', currentID);
 }
 
 function loadList(){
     itemList = JSON.parse(localStorage.getItem('itemList'));
+    currentID = Number(localStorage.getItem('currentID'))
 }
 
-document.onload = function(){
+function resetList(){
+    itemList = [];
+    currentID = 0;
+    saveList();
+    rebuildList();
+    console.log(`List reset.`);
+}
+
+window.onload = function(){
     if('itemList' in localStorage){
         loadList();
         rebuildList();
+        console.log(`List loaded.`);
     }
-    else itemList = [];
+    else saveList();
 }
+
 
 newItemButton.addEventListener('click', submitItem);
 elementList.addEventListener('change', (e) => changeItemStatus(e));
+resetButton.addEventListener('click', resetList);
