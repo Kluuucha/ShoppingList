@@ -1,24 +1,25 @@
 //Item-related code
 
 class Item {
-    constructor(id = 0, name = '', checked = false) {
+    constructor(id = 0, listId = 0, name = '', checked = false) {
         this.id = id;
+        this.listId = listId;
         this.name = name;
         this.checked = checked;
     }
 }
 
-function buildItem(l, item) {
+function buildItem(item) {
     let element = document.createElement('div');
     element.classList.add('form-check');
     element.classList.add('shopping-element');
-    element.id = `shopping-list-${l.id}-item-${item.id}`;
+    element.id = `shopping-list-${item.listId}-item-${item.id}`;
 
     let checkbox = document.createElement('input');
     checkbox.classList.add('form-check-input');
     checkbox.id = `${element.id}-checkbox`;
     checkbox.setAttribute('type', 'checkbox');
-    checkbox.setAttribute('data-list', l.id);
+    checkbox.setAttribute('data-list', item.listId);
     checkbox.setAttribute('data-item', item.id);
     checkbox.checked = item.checked;
 
@@ -38,7 +39,7 @@ function buildItem(l, item) {
 function changeItemStatus(l, e){
     e.preventDefault();
     if(e.target != e.currentTarget){
-        let item = l.itemList.find(t => t.id == e.target.getAttribute('data-item'));
+        let item = l.items.find(t => t.id == e.target.getAttribute('data-item'));
         item.checked = !item.checked;
         console.log(`Current status of "${item.name}": ${item.checked}`);
     }
@@ -56,25 +57,16 @@ class List {
     }
 }
 
-function addItemToList(l){
-    let submitedItem = {
-        'id': l.currentItemID++,
-        'name': getName(`shopping-list-${l.id}-field-add`),
-        'checked': false
-    }
-    l.itemList.push(submitedItem);
-}
-
 function submitItemToList(l) {
-    l.itemList.push(new Item(l.currentItemID++, getName(`shopping-list-${l.id}-field-add`)));
+    l.items.push(new Item(l.current++, l.id, getName(`shopping-list-${l.id}-field-add`)));
     saveData();
     rebuildList(l);
-    console.log(`Current item count: ${l.itemList.length}`);
+    console.log(`Current item count: ${l.items.length}`);
 }
 
 function resetList(l){
-    l.itemList = [];
-    l.currentItemID = 0;
+    l.items = [];
+    l.current = 0;
 
     saveData();
     rebuildList(l);
@@ -88,8 +80,8 @@ function rebuildList(l){
 
     clearChildNodes(listView);
     clearChildNodes(listHeader);
-    listHeader.appendChild(document.createTextNode(l.listName));
-    l.itemList.forEach(item => listView.appendChild(buildItem(l, item)));
+    listHeader.appendChild(document.createTextNode(l.name));
+    l.items.forEach(item => listView.appendChild(buildItem(l, item)));
 }
 
 function buildList(l){
@@ -186,13 +178,15 @@ function addListToCatalog(){
 }
 
 function submitListToCatalog() {
-    addListToCatalog();
+    catalog.lists.push(new List(catalog.current++, getName(`field-add-list`)));
     saveData();
     buildCatalog();
     console.log(`New list added.`);
 }
 
 //Utility
+
+//TODO: change serialization method to allow saving class data
 
 function saveData(){
     localStorage.setItem('catalog', JSON.stringify(catalog));
