@@ -60,7 +60,7 @@ class List {
 function submitItemToList(l) {
     l.items.push(new Item(l.current++, l.id, getName(`shopping-list-${l.id}-field-add`)));
     saveData();
-    rebuildList(l);
+    refreshList(l);
     console.log(`Current item count: ${l.items.length}`);
 }
 
@@ -69,11 +69,11 @@ function resetList(l){
     l.current = 0;
 
     saveData();
-    rebuildList(l);
+    refreshList(l);
     console.log(`List reset.`);
 }
 
-function rebuildList(l){
+function refreshList(l){
     let listContainer = document.getElementById(`shopping-list-${l.id}`);
     let listHeader = listContainer.querySelector(`#shopping-list-${l.id}-title`);
     let listView = listContainer.querySelector(`#shopping-list-${l.id}-view`);
@@ -81,7 +81,7 @@ function rebuildList(l){
     clearChildNodes(listView);
     clearChildNodes(listHeader);
     listHeader.appendChild(document.createTextNode(l.name));
-    l.items.forEach(item => listView.appendChild(buildItem(l, item)));
+    l.items.forEach(item => listView.appendChild(buildItem(item)));
 }
 
 function buildList(l){
@@ -161,7 +161,7 @@ function buildCatalog(){
     if('shoppingLists' in localStorage){
         loadData();
         catalog.lists.forEach(l => listArea.appendChild(buildList(l)));
-        catalog.lists.forEach(l => rebuildList(l));
+        catalog.lists.forEach(l => refreshList(l));
         console.log(`Lists loaded.`);
     }
     else saveData();
