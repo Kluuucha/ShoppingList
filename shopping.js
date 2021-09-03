@@ -1,25 +1,24 @@
-var shoppingLists = []
-var currentListID = 0;
+//Item-related code
 
-const listArea = document.getElementById('shopping-list-area');
-const listElement = document.getElementById('shopping-list');
+class Item {
+    constructor(id = 0, name = '', checked = false) {
+        this.id = id;
+        this.name = name;
+        this.checked = checked;
+    }
+}
 
-const newListButton = document.getElementById('button-add-list');
-const resetListsButton = document.getElementById('button-reset');
-
-//Item-related functions
-
-function createItem (listID, item) {
+function buildItem(l, item) {
     let element = document.createElement('div');
     element.classList.add('form-check');
     element.classList.add('shopping-element');
-    element.id = `shopping-list-${listID}-item-${item.id}`;
+    element.id = `shopping-list-${l.id}-item-${item.id}`;
 
     let checkbox = document.createElement('input');
     checkbox.classList.add('form-check-input');
     checkbox.id = `${element.id}-checkbox`;
     checkbox.setAttribute('type', 'checkbox');
-    checkbox.setAttribute('data-list', listID);
+    checkbox.setAttribute('data-list', l.id);
     checkbox.setAttribute('data-item', item.id);
     checkbox.checked = item.checked;
 
@@ -36,7 +35,26 @@ function createItem (listID, item) {
     return element;
 }
 
-//List-related functions
+function changeItemStatus(l, e){
+    e.preventDefault();
+    if(e.target != e.currentTarget){
+        let item = l.itemList.find(t => t.id == e.target.getAttribute('data-item'));
+        item.checked = !item.checked;
+        console.log(`Current status of "${item.name}": ${item.checked}`);
+    }
+    saveData();
+}
+
+//List-related code
+
+class List {
+    constructor(id = 0, name = '', items = [], current = 0) {
+        this.id = id;
+        this.name = name;
+        this.items = items;
+        this.current = current;
+    }
+}
 
 function addItemToList(l){
     let submitedItem = {
@@ -47,9 +65,9 @@ function addItemToList(l){
     l.itemList.push(submitedItem);
 }
 
-function submitItemToList (l) {
-    addItemToList(l);
-    saveCatalog();
+function submitItemToList(l) {
+    l.itemList.push(new Item(l.currentItemID++, getName(`shopping-list-${l.id}-field-add`)));
+    saveData();
     rebuildList(l);
     console.log(`Current item count: ${l.itemList.length}`);
 }
@@ -58,23 +76,9 @@ function resetList(l){
     l.itemList = [];
     l.currentItemID = 0;
 
-    saveCatalog();
+    saveData();
     rebuildList(l);
     console.log(`List reset.`);
-}
-
-function changeItemStatus(l, e){
-    e.preventDefault();
-    if(e.target != e.currentTarget){
-        item = l.itemList.find(t => findItem(t, e.target.getAttribute('data-item')));
-        item.checked = !item.checked;
-        console.log(`Current status of "${item.name}": ${item.checked}`);
-    }
-    saveCatalog();
-}
-
-function findItem(item, searchID){
-    return item.id == searchID;
 }
 
 function rebuildList(l){
@@ -85,10 +89,10 @@ function rebuildList(l){
     clearChildNodes(listView);
     clearChildNodes(listHeader);
     listHeader.appendChild(document.createTextNode(l.listName));
-    l.itemList.forEach(item => listView.appendChild(createItem(l.id, item)));
+    l.itemList.forEach(item => listView.appendChild(buildItem(l, item)));
 }
 
-function buildList (l){
+function buildList(l){
     let container = document.createElement('div');
     container.id = `shopping-list-${l.id}`;
 
@@ -141,23 +145,21 @@ function buildList (l){
     return container;
 }
 
-//Catalog-related functions
+//Catalog-related code
 
-function saveCatalog(){
-    localStorage.setItem('shoppingLists', JSON.stringify(shoppingLists));
-    localStorage.setItem('currentID', currentListID);
+class Catalog {
+    constructor(id = 0, lists = [], current = 0) {
+        this.id = id;
+        this.lists = lists;
+        this.current = current;
+    }
 }
 
-function loadCatalog(){
-    shoppingLists = JSON.parse(localStorage.getItem('shoppingLists'));
-    currentListID = Number(localStorage.getItem('currentID'));
-}
+
 
 function resetCatalog(){
-    shoppingLists = [];
-    currentListID = 0;
-
-    saveCatalog();
+    catalog = new Catalog();
+    saveData();
     buildCatalog();
     console.log(`Shopping lists cleared.`);
 }
@@ -165,32 +167,40 @@ function resetCatalog(){
 function buildCatalog(){
     clearChildNodes(listArea);
     if('shoppingLists' in localStorage){
-        loadCatalog();
-        shoppingLists.forEach(l => listArea.appendChild(buildList(l)));
-        shoppingLists.forEach(l => rebuildList(l));
+        loadData();
+        catalog.lists.forEach(l => listArea.appendChild(buildList(l)));
+        catalog.lists.forEach(l => rebuildList(l));
         console.log(`Lists loaded.`);
     }
-    else saveCatalog();
+    else saveData();
 }
 
 function addListToCatalog(){
     let submitedItem = {
-        'id': currentListID++,
+        'id': catalog.current++,
         'listName': getName(`field-add-list`),
         'itemList': [],
         'currentItemID': 0
     }
-    shoppingLists.push(submitedItem);
+    catalog.lists.push(submitedItem);
 }
 
-function submitListToCatalog () {
+function submitListToCatalog() {
     addListToCatalog();
-    saveCatalog();
+    saveData();
     buildCatalog();
     console.log(`New list added.`);
 }
 
 //Utility
+
+function saveData(){
+    localStorage.setItem('catalog', JSON.stringify(catalog));
+}
+
+function loadData(){
+    catalog = JSON.parse(localStorage.getItem('catalog'));
+}
 
 function clearChildNodes(parent) {
     parent.innerHTML = '';
@@ -204,6 +214,14 @@ function getName(idString){
 }
 
 //Event-related code
+
+var catalog = new Catalog();
+
+const listArea = document.getElementById('shopping-list-area');
+const listElement = document.getElementById('shopping-list');
+
+const newListButton = document.getElementById('button-add-list');
+const resetListsButton = document.getElementById('button-reset');
 
 window.onload = function(){
     buildCatalog();
