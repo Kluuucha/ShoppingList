@@ -158,7 +158,7 @@ function resetCatalog(){
 
 function buildCatalog(){
     clearChildNodes(listArea);
-    if('shoppingLists' in localStorage){
+    if('catalog' in localStorage){
         loadData();
         catalog.lists.forEach(l => listArea.appendChild(buildList(l)));
         catalog.lists.forEach(l => refreshList(l));
